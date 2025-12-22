@@ -60,7 +60,7 @@ class Qwen2VLMRForConditionalGeneration(Qwen2VLForConditionalGeneration):
             video_index += t
         video_embeds = torch.cat(video_embeds).to(pixel_values_videos.device)
         return video_embeds
-    
+    # MoRoPE
     def get_rope_index_multiqa(
         self,
         input_ids: Optional[torch.LongTensor] = None,

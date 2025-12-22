@@ -1,10 +1,10 @@
-# export CUDA_VISIBLE_DEVICES=0,1,2,3
+export CUDA_VISIBLE_DEVICES=2,3
 export DECORD_EOF_RETRY_MAX=20480
 
-python inference.py --model_local_path path_to_qwen2vl7B \
-    --model_finetune_path ./checkpoints/RUN_NAME \
-    --video_root path_to_video_root \
-    --feat_folder path_to_feat_folder \
-    --data_path path_to_test_data \
-    --output_dir ./results/RUN_NAME \
+python inference.py --model_local_path /home/fwj/workspace/pretrain_model/Qwen/Qwen2-VL-7B-Instruct \
+    --model_finetune_path /home/fwj/workspace/code/UniTime/checkpoints/charades_frame1024_lora88_bsz2_LR2e4_epoch2 \
+    --video_root /home/fwj/workspace/VisualSearch/charades/Charades_v1 \
+    --feat_folder /home/fwj/workspace/VisualSearch/unitime_feat/charades_7b \
+    --data_path /home/fwj/workspace/code/UniTime/UniTime_data/charades/test.json \
+    --output_dir /home/fwj/workspace/code/UniTime/results/charades_frame1024_lora88_bsz2_LR2e4_epoch2 \
     --nf_short 128

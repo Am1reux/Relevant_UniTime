@@ -1,0 +1,114 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug Feature Offline (Corrected)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/feature_offline.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "env": {
+                "DECORD_EOF_RETRY_MAX": "20480",
+                "CUDA_LAUNCH_BLOCKING": "1" 
+            },
+            "args": [
+                "--data_path", "/home/fwj/workspace/code/UniTime/UniTime_data/qvhl/train.json",
+                "--part", "3",
+                "--gpu", "3", 
+                "--num_parts", "4",
+                "--model_local_path", "/home/fwj/workspace/pretrain_model/Qwen/Qwen2-VL-7B-Instruct",
+                "--feat_root", "/raid0/fwj/VisualSearch/unitime_feat",
+                "--video_root", "/raid5/fwj/VisualSearch/qvhighlight/videos"
+            ]
+        },
+        {
+            "name": "Debug Train Relevant Charades",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "torch.distributed.run",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "env": {
+                "CUDA_VISIBLE_DEVICES": "2",
+                "DECORD_EOF_RETRY_MAX": "20480"
+            },
+            "args": [
+                "--nnodes=1",
+                "--nproc_per_node=1",
+                "--rdzv_backend=c10d",
+                "--rdzv_endpoint=localhost:0",
+                "train_relevant.py",
+                "--model_id", "qwen2-vl-7b-instruct",
+                "--model_local_path", "/home/fwj/workspace/pretrain_model/Qwen/Qwen2-VL-7B-Instruct",
+                "--data_path", "/home/fwj/workspace/code/UniTime/UniTime_data/charades/train.json",
+                "--eval_data_path", "/home/fwj/workspace/code/UniTime/UniTime_data/charades/test2.0.json",
+                "--image_folder", "None",
+                "--video_folder", "/home/fwj/workspace/VisualSearch/charades/Charades_v1",
+                "--feat_folder", "/home/fwj/workspace/VisualSearch/unitime_feat/charades_7b",
+                "--fps", "2",
+                "--clip_length", "32",
+                "--output_dir", "./checkpoints/debug",
+                "--report_to", "tensorboard",
+                "--run_name", "debug",
+                "--deepspeed", "./ds_configs/zero2.json",
+                "--bf16", "True",
+                "--num_train_epochs", "2",
+                "--per_device_train_batch_size", "1",
+                "--per_device_eval_batch_size", "1",
+                "--gradient_accumulation_steps", "1",
+                "--learning_rate", "2e-4",
+                "--weight_decay", "0.",
+                "--warmup_ratio", "0.03",
+                "--lr_scheduler_type", "cosine",
+                "--logging_steps", "1",
+                "--tf32", "True",
+                "--model_max_length", "32768",
+                "--gradient_checkpointing", "True",
+                "--dataloader_num_workers", "4",
+                "--train_vision_encoder", "False",
+                "--use_vision_lora", "False",
+                "--train_vision_projector", "False",
+                "--use_lora", "True",
+                "--q_lora", "False",
+                "--lora_r", "8",
+                "--lora_alpha", "8",
+                "--save_strategy", "epoch"
+            ]
+        },
+        {
+            "name": "Debug Inference Test",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/inference_relevant.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "env": {
+                "CUDA_VISIBLE_DEVICES": "1"
+            },
+            "args": [
+                "--model_local_path", "/home/fwj/workspace/pretrain_model/Qwen/Qwen2-VL-7B-Instruct",
+                "--model_finetune_path", "/home/fwj/workspace/code/UniTime/checkpoints/Relevant_Charades_frame1024_lora88_bsz2_LR2e4_epoch2_251218/checkpoint-2396",
+                "--video_root", "/home/fwj/workspace/VisualSearch/charades/Charades_v1",
+                "--feat_folder", "/home/fwj/workspace/VisualSearch/unitime_feat/charades_7b",
+                "--data_path", "/home/fwj/workspace/code/UniTime/UniTime_data/charades/test2.0.json",
+                "--output_dir", "/home/fwj/workspace/code/UniTime/results/Relevant_Charades_frame1024_lora88_bsz2_LR2e4_epoch2",
+                "--nf_short", "128"
+            ]
+        },
+        {
+            "name": "Debug Eval Metric Relevant",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/eval_metrics_relevant.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "env": {
+                "CUDA_VISIBLE_DEVICES": "1"
+            },
+            "args": [
+                "--res", "/home/fwj/workspace/code/UniTime/results/Relevant_charades_frame1024_lora88_bsz2_LR2e4_epoch2/results.json",
+            ]
+        }
+    ]
+}

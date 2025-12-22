@@ -1,0 +1,98 @@
+nohup: ignoring input
+[2025-12-11 01:24:30,634] torch.distributed.run: [WARNING] master_addr is only used for static rdzv_backend and when rdzv_endpoint is not specified.
+[2025-12-11 01:24:30,635] torch.distributed.run: [WARNING] 
+[2025-12-11 01:24:30,635] torch.distributed.run: [WARNING] *****************************************
+[2025-12-11 01:24:30,635] torch.distributed.run: [WARNING] Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+[2025-12-11 01:24:30,635] torch.distributed.run: [WARNING] *****************************************
+[2025-12-11 01:24:36,959] [INFO] [real_accelerator.py:222:get_accelerator] Setting ds_accelerator to cuda (auto detect)
+[2025-12-11 01:24:36,959] [INFO] [real_accelerator.py:222:get_accelerator] Setting ds_accelerator to cuda (auto detect)
+/raid5/fwj/miniconda3/envs/UniTime/lib/python3.10/site-packages/torch/utils/cpp_extension.py:28: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import packaging  # type: ignore[attr-defined]
+/raid5/fwj/miniconda3/envs/UniTime/lib/python3.10/site-packages/torch/utils/cpp_extension.py:28: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import packaging  # type: ignore[attr-defined]
+[2025-12-11 01:24:37,862] [INFO] [comm.py:658:init_distributed] cdb=None
+[2025-12-11 01:24:37,862] [INFO] [comm.py:689:init_distributed] Initializing TorchBackend in DeepSpeed with backend nccl
+[2025-12-11 01:24:37,916] [INFO] [comm.py:658:init_distributed] cdb=None
+Loading model, tokenizer, processor...
+Loading checkpoint shards:   0%|          | 0/5 [00:00<?, ?it/s]Loading checkpoint shards:   0%|          | 0/5 [00:00<?, ?it/s]Loading checkpoint shards:  20%|██        | 1/5 [00:00<00:00,  5.18it/s]Loading checkpoint shards:  20%|██        | 1/5 [00:00<00:00,  5.90it/s]Loading checkpoint shards:  40%|████      | 2/5 [00:00<00:00,  7.11it/s]Loading checkpoint shards:  60%|██████    | 3/5 [00:00<00:00,  8.16it/s]Loading checkpoint shards:  60%|██████    | 3/5 [00:00<00:00,  7.24it/s]Loading checkpoint shards: 100%|██████████| 5/5 [00:00<00:00,  9.53it/s]Loading checkpoint shards: 100%|██████████| 5/5 [00:00<00:00,  8.84it/s]
+Using a slow image processor as `use_fast` is unset and a slow processor was saved with this model. `use_fast=True` will be the default behavior in v4.48, even if the model was saved with a slow processor. This will result in minor differences in outputs. You'll still be able to use a slow processor with `use_fast=False`.
+Loading checkpoint shards:  80%|████████  | 4/5 [00:00<00:00,  7.80it/s]Loading checkpoint shards: 100%|██████████| 5/5 [00:00<00:00,  8.03it/s]
+Using a slow image processor as `use_fast` is unset and a slow processor was saved with this model. `use_fast=True` will be the default behavior in v4.48, even if the model was saved with a slow processor. This will result in minor differences in outputs. You'll still be able to use a slow processor with `use_fast=False`.
+Vision encoder is freezed... including:
+	visual.patch_embed
+	visual.rotary_pos_emb
+	visual.blocks
+Vision projector is freezed... including:
+	visual.merger
+LoRA for LLM enabled...
+Loading data...
+Detected kernel version 5.4.0, which is below the recommended minimum of 5.5.0; this can cause the process to hang. It is recommended to upgrade the kernel to the minimum version or higher.
+  0%|          | 0/4792 [00:00<?, ?it/s]/raid5/fwj/miniconda3/envs/UniTime/lib/python3.10/site-packages/torch/utils/checkpoint.py:61: UserWarning: None of the inputs have requires_grad=True. Gradients will be None
+  warnings.warn(
+/raid5/fwj/miniconda3/envs/UniTime/lib/python3.10/site-packages/torch/utils/checkpoint.py:61: UserWarning: None of the inputs have requires_grad=True. Gradients will be None
+  warnings.warn(
+`use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`...
+`use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`...
+  0%|          | 1/4792 [00:36<48:42:54, 36.60s/it]                                                   {'loss': 1.8548, 'grad_norm': 1.81219482421875, 'learning_rate': 1.388888888888889e-06, 'epoch': 0.0}
+  0%|          | 1/4792 [00:36<48:42:54, 36.60s/it]  0%|          | 2/4792 [00:53<33:14:49, 24.99s/it]                                                   {'loss': 1.7722, 'grad_norm': 1.5715420246124268, 'learning_rate': 2.777777777777778e-06, 'epoch': 0.0}
+  0%|          | 2/4792 [00:53<33:14:49, 24.99s/it]  0%|          | 3/4792 [01:09<28:00:41, 21.06s/it]                                                   {'loss': 1.8219, 'grad_norm': 1.7668519020080566, 'learning_rate': 4.166666666666667e-06, 'epoch': 0.0}
+  0%|          | 3/4792 [01:09<28:00:41, 21.06s/it]  0%|          | 4/4792 [01:29<27:09:31, 20.42s/it]                                                   {'loss': 2.0305, 'grad_norm': 2.0682990550994873, 'learning_rate': 5.555555555555556e-06, 'epoch': 0.0}
+  0%|          | 4/4792 [01:29<27:09:31, 20.42s/it]  0%|          | 5/4792 [01:45<25:18:08, 19.03s/it]                                                   {'loss': 1.7091, 'grad_norm': 2.0760538578033447, 'learning_rate': 6.944444444444445e-06, 'epoch': 0.0}
+  0%|          | 5/4792 [01:45<25:18:08, 19.03s/it]  0%|          | 6/4792 [02:02<24:11:05, 18.19s/it]                                                   {'loss': 1.9411, 'grad_norm': 1.9561362266540527, 'learning_rate': 8.333333333333334e-06, 'epoch': 0.0}
+  0%|          | 6/4792 [02:02<24:11:05, 18.19s/it]  0%|          | 7/4792 [02:20<24:12:57, 18.22s/it]                                                   {'loss': 1.7784, 'grad_norm': 1.6797375679016113, 'learning_rate': 9.722222222222223e-06, 'epoch': 0.0}
+  0%|          | 7/4792 [02:20<24:12:57, 18.22s/it]  0%|          | 8/4792 [02:37<23:28:55, 17.67s/it]                                                   {'loss': 1.7746, 'grad_norm': 1.6155165433883667, 'learning_rate': 1.1111111111111112e-05, 'epoch': 0.0}
+  0%|          | 8/4792 [02:37<23:28:55, 17.67s/it]  0%|          | 9/4792 [02:58<25:04:01, 18.87s/it]                                                   {'loss': 2.0473, 'grad_norm': 2.167135000228882, 'learning_rate': 1.25e-05, 'epoch': 0.0}
+  0%|          | 9/4792 [02:58<25:04:01, 18.87s/it]  0%|          | 10/4792 [03:15<24:13:42, 18.24s/it]                                                    {'loss': 1.7497, 'grad_norm': 2.0798940658569336, 'learning_rate': 1.388888888888889e-05, 'epoch': 0.0}
+  0%|          | 10/4792 [03:15<24:13:42, 18.24s/it]  0%|          | 11/4792 [03:35<24:44:39, 18.63s/it]                                                    {'loss': 1.8244, 'grad_norm': 1.8210748434066772, 'learning_rate': 1.527777777777778e-05, 'epoch': 0.0}
+  0%|          | 11/4792 [03:35<24:44:39, 18.63s/it]  0%|          | 12/4792 [03:53<24:44:01, 18.63s/it]                                                    {'loss': 1.9237, 'grad_norm': 2.1956536769866943, 'learning_rate': 1.6666666666666667e-05, 'epoch': 0.01}
+  0%|          | 12/4792 [03:53<24:44:01, 18.63s/it]  0%|          | 13/4792 [04:10<24:04:19, 18.13s/it]                                                    {'loss': 1.7236, 'grad_norm': 1.7471978664398193, 'learning_rate': 1.8055555555555555e-05, 'epoch': 0.01}
+  0%|          | 13/4792 [04:10<24:04:19, 18.13s/it]  0%|          | 14/4792 [04:27<23:37:46, 17.80s/it]                                                    {'loss': 1.7347, 'grad_norm': 1.752846360206604, 'learning_rate': 1.9444444444444445e-05, 'epoch': 0.01}
+  0%|          | 14/4792 [04:27<23:37:46, 17.80s/it]  0%|          | 15/4792 [04:44<23:09:45, 17.46s/it]                                                    {'loss': 1.5422, 'grad_norm': 2.0522589683532715, 'learning_rate': 2.0833333333333336e-05, 'epoch': 0.01}
+  0%|          | 15/4792 [04:44<23:09:45, 17.46s/it]  0%|          | 16/4792 [05:03<23:43:52, 17.89s/it]                                                    {'loss': 1.9888, 'grad_norm': 1.711814045906067, 'learning_rate': 2.2222222222222223e-05, 'epoch': 0.01}
+  0%|          | 16/4792 [05:03<23:43:52, 17.89s/it]  0%|          | 17/4792 [05:22<24:15:15, 18.29s/it]                                                    {'loss': 1.8503, 'grad_norm': 2.613452911376953, 'learning_rate': 2.361111111111111e-05, 'epoch': 0.01}
+  0%|          | 17/4792 [05:22<24:15:15, 18.29s/it]  0%|          | 18/4792 [05:40<24:03:18, 18.14s/it]                                                    {'loss': 1.7478, 'grad_norm': 1.7316237688064575, 'learning_rate': 2.5e-05, 'epoch': 0.01}
+  0%|          | 18/4792 [05:40<24:03:18, 18.14s/it]  0%|          | 19/4792 [05:57<23:51:44, 18.00s/it]                                                    {'loss': 1.7391, 'grad_norm': 1.7156013250350952, 'learning_rate': 2.6388888888888892e-05, 'epoch': 0.01}
+  0%|          | 19/4792 [05:57<23:51:44, 18.00s/it]  0%|          | 20/4792 [06:14<23:29:30, 17.72s/it]                                                    {'loss': 1.6393, 'grad_norm': 1.6969194412231445, 'learning_rate': 2.777777777777778e-05, 'epoch': 0.01}
+  0%|          | 20/4792 [06:15<23:29:30, 17.72s/it]  0%|          | 21/4792 [06:33<23:51:31, 18.00s/it]                                                    {'loss': 1.5548, 'grad_norm': 1.728758692741394, 'learning_rate': 2.916666666666667e-05, 'epoch': 0.01}
+  0%|          | 21/4792 [06:33<23:51:31, 18.00s/it]  0%|          | 22/4792 [06:52<24:06:02, 18.19s/it]                                                    {'loss': 1.7291, 'grad_norm': 1.9073622226715088, 'learning_rate': 3.055555555555556e-05, 'epoch': 0.01}
+  0%|          | 22/4792 [06:52<24:06:02, 18.19s/it]  0%|          | 23/4792 [07:09<23:33:49, 17.79s/it]                                                    {'loss': 1.5423, 'grad_norm': 2.477315902709961, 'learning_rate': 3.194444444444444e-05, 'epoch': 0.01}
+  0%|          | 23/4792 [07:09<23:33:49, 17.79s/it]  1%|          | 24/4792 [07:25<23:08:32, 17.47s/it]                                                    {'loss': 1.4077, 'grad_norm': 2.224574327468872, 'learning_rate': 3.3333333333333335e-05, 'epoch': 0.01}
+  1%|          | 24/4792 [07:25<23:08:32, 17.47s/it]  1%|          | 25/4792 [07:42<22:45:56, 17.19s/it]                                                    {'loss': 1.1579, 'grad_norm': 2.8815512657165527, 'learning_rate': 3.472222222222222e-05, 'epoch': 0.01}
+  1%|          | 25/4792 [07:42<22:45:56, 17.19s/it]  1%|          | 26/4792 [07:59<22:52:54, 17.28s/it]                                                    {'loss': 1.2757, 'grad_norm': 2.2600152492523193, 'learning_rate': 3.611111111111111e-05, 'epoch': 0.01}
+  1%|          | 26/4792 [07:59<22:52:54, 17.28s/it]  1%|          | 27/4792 [08:17<23:06:55, 17.46s/it]                                                    {'loss': 1.1987, 'grad_norm': 2.4519410133361816, 'learning_rate': 3.7500000000000003e-05, 'epoch': 0.01}
+  1%|          | 27/4792 [08:17<23:06:55, 17.46s/it][2025-12-11 01:33:16,483] torch.distributed.elastic.multiprocessing.api: [ERROR] failed (exitcode: -9) local_rank: 0 (pid: 2601664) of binary: /raid5/fwj/miniconda3/envs/UniTime/bin/python3.10
+Traceback (most recent call last):
+  File "/raid5/fwj/miniconda3/envs/UniTime/bin/torchrun", line 7, in <module>
+    sys.exit(main())
+  File "/raid5/fwj/miniconda3/envs/UniTime/lib/python3.10/site-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 346, in wrapper
+    return f(*args, **kwargs)
+  File "/raid5/fwj/miniconda3/envs/UniTime/lib/python3.10/site-packages/torch/distributed/run.py", line 806, in main
+    run(args)
+  File "/raid5/fwj/miniconda3/envs/UniTime/lib/python3.10/site-packages/torch/distributed/run.py", line 797, in run
+    elastic_launch(
+  File "/raid5/fwj/miniconda3/envs/UniTime/lib/python3.10/site-packages/torch/distributed/launcher/api.py", line 134, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+  File "/raid5/fwj/miniconda3/envs/UniTime/lib/python3.10/site-packages/torch/distributed/launcher/api.py", line 264, in launch_agent
+    raise ChildFailedError(
+torch.distributed.elastic.multiprocessing.errors.ChildFailedError: 
+========================================================
+train.py FAILED
+--------------------------------------------------------
+Failures:
+[1]:
+  time      : 2025-12-11_01:33:16
+  host      : localhost
+  rank      : 1 (local_rank: 1)
+  exitcode  : -9 (pid: 2601665)
+  error_file: <N/A>
+  traceback : Signal 9 (SIGKILL) received by PID 2601665
+--------------------------------------------------------
+Root Cause (first observed failure):
+[0]:
+  time      : 2025-12-11_01:33:16
+  host      : localhost
+  rank      : 0 (local_rank: 0)
+  exitcode  : -9 (pid: 2601664)
+  error_file: <N/A>
+  traceback : Signal 9 (SIGKILL) received by PID 2601664
+========================================================

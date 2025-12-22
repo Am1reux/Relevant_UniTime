@@ -93,11 +93,11 @@ def main():
     
     # [ToModify] path_to_test_data for each benchmark
     gt_paths = {
-        "charades":"./datasets/charades/test_all.json",
+        "charades":"/home/fwj/workspace/code/UniTime/UniTime_data/charades/test.json",
         "ego4d":"./datasets/ego4d/val_all.json",
         "tacos":"./datasets/tacos/test_all.json",
-        "anet":"./datasets/anet/test_all.json",
-        "qvhighlights":"./datasets/qvhighlights/val_vc.json",
+        "anet":"/home/fwj/workspace/code/UniTime/UniTime_data/anet/test_x.json",
+        "qvhighlights":"/home/fwj/workspace/code/UniTime/UniTime_data/qvhl/val.json",
     }
     
     thresholds_dict ={

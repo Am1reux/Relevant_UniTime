@@ -15,7 +15,6 @@ args = parser.parse_args()
 
 device = torch.device(f'cuda:{args.gpu}')
 data_path = args.data_path
-
 feature_root = args.feat_root
 video_root = args.video_root
 
@@ -25,7 +24,15 @@ if 'ego4d' in data_path or 'nlq' in data_path:
 elif 'tacos' in data_path:
     dataset = 'tacos'
     video_type = 'avi'
-
+elif 'charades' in data_path:
+    dataset = 'charades'
+    video_type = 'mp4'
+elif 'anet' in data_path:
+    dataset = 'anet'
+    video_type = 'mp4'
+elif 'qvhl' in data_path:
+    dataset = 'qvhl'
+    video_type = 'mp4'
 feature_path = f'{feature_root}/{dataset}'
 
 import os
@@ -36,7 +43,8 @@ print(f"processing {dataset} part {args.part}")
 compute_dtype = torch.bfloat16
 device_map = None
 bnb_config = None
-model_local_path = args.model_local_path
+model_local_path = args.model_local_path 
+# print(model_local_path)
 loading_kwargs = dict(
         torch_dtype=compute_dtype,
         quantization_config=bnb_config,
@@ -72,8 +80,13 @@ with torch.no_grad():
         vid = source["id"]
         if source["mode"] == 'mr':
             continue
+        # mrseg太长了,所以需要预先抽取，mr直接当场抽
+        # 5KE9KvBKL9g_210.0_360.0
+        if vid == '5KE9KvBKL9g_210.0_360.0':
+            print("error vid", vid)
         visual_feature_path = f"{feature_path}/{vid}.pt"
         if os.path.exists(visual_feature_path):
+            print("already exists:", vid)
             continue
         if vid not in vid_list:
             vid_list.append(vid)
@@ -111,8 +124,18 @@ with torch.no_grad():
         
         video_path = video_path_list_subset[i]
         if video_path == None:
+            # origin
             video_path = os.path.join(video_root,f"{vid}.{video_type}")
-        
+            # now
+            # video_type_list = ['mp4', 'avi', 'mov', 'mkv']
+            # found = False
+            # video_path = os.path.join(video_root,f"{vid}.{video_type}")
+            # for ext in video_type_list:
+            #     cand = os.path.join(video_root, f"{vid}.{ext}")
+            #     if os.path.exists(cand):
+            #         video_path = cand
+            #         found = True
+            #         break
         try:
             vr = decord.VideoReader(video_path, ctx=decord.cpu(0))
         except:

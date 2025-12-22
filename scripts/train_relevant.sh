@@ -11,30 +11,17 @@ DISTRIBUTED_ARGS="
 export DECORD_EOF_RETRY_MAX=20480
 
 MODEL_ID=qwen2-vl-7b-instruct
-# MODEL_ID=qwen2-vl-2b-instruct
-# model_local_path=/home/fwj/workspace/pretrain_model/Qwen/Qwen2-VL-2B-Instruct
 model_local_path=/home/fwj/workspace/pretrain_model/Qwen/Qwen2-VL-7B-Instruct
-# TRAIN_DATA_PATH=/home/fwj/workspace/code/UniTime/UniTime_data/anet/train_x.json
-# TRAIN_DATA_PATH=/home/fwj/workspace/code/UniTime/UniTime_data/qvhl/train.json
 TRAIN_DATA_PATH=/home/fwj/workspace/code/UniTime/UniTime_data/charades/train.json
 
-EVAL_DATA_PATH=/home/fwj/workspace/code/UniTime/UniTime_data/charades/test.json
-# EVAL_DATA_PATH=/home/fwj/workspace/code/UniTime/UniTime_data/anet/test_x.json
-# EVAL_DATA_PATH=/home/fwj/workspace/code/UniTime/UniTime_data/qvhl/val.json
+# EVAL_DATA_PATH=/home/fwj/workspace/code/UniTime/UniTime_data/charades/test.json
+EVAL_DATA_PATH=/home/fwj/workspace/code/UniTime/UniTime_data/charades/val2.0.json
 IMAGE_FOLDER=None
 
 VIDEO_FOLDER=/home/fwj/workspace/VisualSearch/charades/Charades_v1 #If you specified video_path in the data file, this can be set to none
-# VIDEO_FOLDER=/raid5/hl/VisualSearch/activitynet/VideoData #If you specified video_path in the data file, this can be set to none
-# VIDEO_FOLDER=/raid5/fwj/VisualSearch/qvhighlight/videos #If you specified video_path in the data file, this can be set to none
 
-# FEAT_FOLDER=/home/fwj/workspace/VisualSearch/unitime_feat/charades #If you specified feature_path in the data file, this can be set to none
-# FEAT_FOLDER=/raid0/fwj/VisualSearch/unitime_feat/anet #If you specified feature_path in the data file, this can be set to none
-# FEAT_FOLDER=/raid0/fwj/VisualSearch/unitime_feat/qvhl #If you specified feature_path in the data file, this can be set to none
 FEAT_FOLDER=/home/fwj/workspace/VisualSearch/unitime_feat/charades_7b #If you specified feature_path in the data file, this can be set to none
 
-# FEAT_FOLDER=None #If you specified feature_path in the data file, this can be set to none
-# FEAT_FOLDER=None
-# FEAT_FOLDER=/home/fwj/workspace/VisualSearch/unitime_feat/charades_7b #If you specified feature_path in the data file, this can be set to none
 
 FPS=2
 CLIP_LENGTH=32
@@ -48,10 +35,7 @@ Q_LORA=False                                            # whether use q-lora for
 LORA_R=8                                                # the lora rank (both llm and vision encoder)
 LORA_ALPHA=8                                            # the lora alpha (both llm and vision encoder)
 
-# RUN_ID=Total_512_QLoRA32_LR2e4_epoch2
-# RUN_ID=CH_Total_1024_LR2e4_epoch2
-# RUN_ID=qvhl_frame1024_lora88_bsz2_LR2e4_epoch2
-RUN_ID=test_ch_frame1024_lora88_bsz2_LR2e4_epoch2
+RUN_ID=Relevant_Charades_frame1024_lora88_bsz2_LR2e4_epoch2_251218
 
 DS_STAGE=zero2                                          # deepspeed stage; < zero2 | zero3 >
 PER_DEVICE_BATCH_SIZE=1                                # batch size per GPU
@@ -61,7 +45,7 @@ NUM_EPOCHS=2 # number of training epochs, 1 for tacos, ego4d and pretrain, 2 for
 LR=2e-4                                                 # learning rate
 MODEL_MAX_LEN=32768                                      # maximum input length of the model
 
-torchrun $DISTRIBUTED_ARGS train.py \
+torchrun $DISTRIBUTED_ARGS train_relevant.py \
     --model_id $MODEL_ID \
     --model_local_path $model_local_path \
     --data_path $TRAIN_DATA_PATH \

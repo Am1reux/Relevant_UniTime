@@ -134,7 +134,8 @@ def main():
     video_root = 'path_to_video_root' #[ToModify]
     feat_root = 'path_to_feature_folder' #[ToModify]
     ann_root = './'
-    repeat_num = 4 #[ToModify] 4 for long video datasets, 1 for short video datasets
+    repeat_num = 1 #[ToModify] 4 for long video datasets, 1 for short video datasets
+    # annos_num = 1 #[ToModify] The number of QA samples for video-centric training can be adjusted based on your actual GPU memory.
     annos_num = 45 #[ToModify] The number of QA samples for video-centric training can be adjusted based on your actual GPU memory.
     
     print("Processing training data...")
