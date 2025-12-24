@@ -32,10 +32,11 @@ TRAIN_VISION_PROJECTOR=False                            # whether train the visi
 
 USE_LORA=True                                           # whether use lora for llm
 Q_LORA=False                                            # whether use q-lora for llm; only effective when `USE_LORA` is True
-LORA_R=8                                                # the lora rank (both llm and vision encoder)
+LORA_R=32                                                # the lora rank (both llm and vision encoder)
 LORA_ALPHA=8                                            # the lora alpha (both llm and vision encoder)
 
-RUN_ID=Relevant_Charades_frame1024_lora88_bsz2_LR2e4_epoch2_251218
+# RUN_ID=Relevant_Charades_frame1024_lora88_bsz2_LR2e4_epoch2_251218
+RUN_ID=Relevant_Charades_frame1024_lora328_bsz2_LR2e4_epoch2_baseline
 
 DS_STAGE=zero2                                          # deepspeed stage; < zero2 | zero3 >
 PER_DEVICE_BATCH_SIZE=1                                # batch size per GPU

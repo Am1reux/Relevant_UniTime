@@ -8,4 +8,5 @@ def register_loader(name):
         return cls
     return register_loader_cls
 
-from .qwen2_vl import Qwen2VLModelLoader
+# from .qwen2_vl import Qwen2VLModelLoader
+from .qwen2_vl_relevant_rematch import Qwen2VLModelLoader

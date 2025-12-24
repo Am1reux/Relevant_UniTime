@@ -25,4 +25,8 @@ class Qwen2VLModelLoader(BaseModelLoader):
         model.tokenizer = tokenizer
         config = AutoConfig.from_pretrained(self.model_local_path)
 
+        #  添加特殊token的处理
+        
+
+
         return model, tokenizer, processor, config

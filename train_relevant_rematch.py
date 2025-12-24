@@ -13,7 +13,7 @@ from transformers.integrations.deepspeed import is_deepspeed_zero3_enabled
 from arguments import ModelArguments, DataArguments, TrainingArguments, LoraArguments
 from collators import COLLATORS
 # from datasets_mr_relevant import VideoCentricDataset
-from datasets_mr_relevant import VideoCentricDataset
+from datasets_mr_relevant_rematch import VideoCentricDataset
 from loaders import LOADERS
 from supported_models import MODULE_KEYWORDS
 from utils import (
@@ -69,6 +69,7 @@ def train():
     model, tokenizer, processor, config = loader.load()
     tokenizer.model_max_length = training_args.model_max_length
 
+
     if training_args.gradient_checkpointing:
         model.enable_input_require_grads()
 
@@ -122,6 +123,7 @@ def train():
             rank0_print("Vision projector will be fully trained...")
             full_modules.extend(vision_projector_keys)
         
+
         lora_config = LoraConfig(
             r=lora_args.lora_r,
             lora_alpha=lora_args.lora_alpha,
@@ -138,6 +140,14 @@ def train():
             )
             
         model = get_peft_model(model, lora_config)
+        
+        # 确认一下如果新加入了lrt token 那么我应该怎么进行lora微调呢 
+        # 我是解冻lrt token的emb 还是 全部的emb ?
+        lrt_token = "<|lrt|>"
+        lrt_id = tokenizer.convert_tokens_to_ids(lrt_token)
+        embedding = model.get_input_embeddings()
+        embedding.weight[lrt_id].requires_grad = True
+        
         
     # load data
     rank0_print("Loading data...")

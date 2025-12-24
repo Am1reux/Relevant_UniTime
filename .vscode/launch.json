@@ -38,7 +38,7 @@
                 "--nproc_per_node=1",
                 "--rdzv_backend=c10d",
                 "--rdzv_endpoint=localhost:0",
-                "train_relevant.py",
+                "train_relevant_rematch.py",
                 "--model_id", "qwen2-vl-7b-instruct",
                 "--model_local_path", "/home/fwj/workspace/pretrain_model/Qwen/Qwen2-VL-7B-Instruct",
                 "--data_path", "/home/fwj/workspace/code/UniTime/UniTime_data/charades/train.json",
