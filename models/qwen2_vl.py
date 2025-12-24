@@ -28,9 +28,148 @@ class Qwen2VLMRForConditionalGeneration(Qwen2VLForConditionalGeneration):
         self.padding_side = "left"  # set it to left by default, user can use setter to change padding_sides
         self.rope_deltas = None
 
+        # ======== LRT 模块 =======
+        self.num_lrt_tokens = getattr(config, 'num_lrt_tokens', 8)
+        
+        self.lrt_embeddings = nn.Parameter(torch.randn(self.num_lrt_tokens, config.hidden_size) * 0.02)
+
+        # 分类头
+        self.lrt_classifier = nn.Sequential(
+            nn.Linear(config.hidden_size, config.hidden_size // 2),
+            nn.ReLU(),
+            nn.Dropout(0.1),
+            nn.Linear(config.hidden_size // 2, 1)
+        )
+
+        # 损失权重获取
+        self.aux_cls_weight = getattr(config, 'aux_cls_weight', 0.1)
+        self.aux_orth_weight = getattr(config, 'aux_orth_weight', 0.01)
+        
+
         # Initialize weights and apply final processing
         self.post_init()
+   
+    # 提取lrt_feat
+    def extract_lrt_hidden_states(self, hidden_states, lrt_positions):
+        """
+        从模型输出中提取 LRT token 的 hidden states
+        
+        Args:
+            hidden_states: [batch, seq_len, hidden_dim]
+            lrt_positions: List[List[Tuple[int, int]]] - 每个样本的 LRT 位置
+        
+        Returns:
+            lrt_features: List[Tensor] - 每个 Query 的 LRT features [num_lrt_tokens, hidden_dim]
+        """
+        batch_size = hidden_states.shape[0]
+        all_lrt_features = []
+        
+        for batch_idx in range(batch_size):
+            sample_lrt_positions = lrt_positions[batch_idx]  # [(start, end), ...]
+            
+            for start_idx, end_idx in sample_lrt_positions:
+                # 提取 LRT tokens 的 hidden states
+                lrt_hidden = hidden_states[batch_idx, start_idx:end_idx, :]  # [K, D]
+                all_lrt_features.append(lrt_hidden)
+        
+        return all_lrt_features  # List of [K, D] tensors
 
+    def compute_lrt_classification_loss(self, lrt_features, relevant, lrt_positions):
+        """
+        计算 LRT 分类损失 (判断 Query 是否相关)
+        
+        Args:
+            lrt_features: List[Tensor] - 每个 Query 的 LRT features [K, D]
+            relevant: List[List[bool]] - 每个样本的每个 Query 的相关性标签
+            lrt_positions: List[List[Tuple[int, int]]] - LRT 位置信息
+        
+        Returns:
+            cls_loss: Tensor - 分类损失
+        """
+        batch_size = len(lrt_positions)
+        logits_list = []
+        targets_list = []
+        
+        feature_idx = 0
+        for batch_idx in range(batch_size):
+            sample_lrt_positions = lrt_positions[batch_idx]
+            sample_relevant = relevant[batch_idx]  # 当前样本的所有 Query 的相关性
+            
+            for query_idx, (start_idx, end_idx) in enumerate(sample_lrt_positions):
+                # 1. 聚合 LRT features (Mean Pooling)
+                lrt_feature = lrt_features[feature_idx]  # [K, D]
+                z_i = lrt_feature.mean(dim=0)  # [D]
+                
+                # 2. 通过分类头
+                logit = self.lrt_classifier(z_i).squeeze(-1)  # scalar
+                logits_list.append(logit)
+                
+                # 3. 直接使用 relevant 标签
+                target = 1.0 if sample_relevant[query_idx] else 0.0
+                targets_list.append(target)
+                
+                feature_idx += 1
+        
+        if len(logits_list) == 0:
+            return torch.tensor(0.0, device=lrt_features[0].device)
+        
+        logits = torch.stack(logits_list)
+        targets = torch.tensor(targets_list, device=logits.device, dtype=torch.float32)
+        
+        # BCE with Logits Loss
+        cls_loss = F.binary_cross_entropy_with_logits(logits, targets)
+        return cls_loss
+
+    def compute_lrt_orthogonality_loss(self, lrt_features):
+        """
+        计算 LRT 正交损失 (防止 Token 学到重复信息)
+        
+        使用公式: L_orth = (2 / (K(K-1))) * sum_{i<j} (e_i^T * e_j)^2
+        
+        Args:
+            lrt_features: List[Tensor] - 每个 Query 的 LRT features [K, D]
+        
+        Returns:
+            orth_loss: Tensor - 正交损失
+        """
+        orth_losses = []
+        
+        for lrt_hidden in lrt_features:
+            # lrt_hidden: [K, D]
+            K = lrt_hidden.shape[0]
+            
+            if K <= 1:
+                # 只有一个 token，无需计算正交损失
+                continue
+            
+            # 1. L2 归一化
+            lrt_normalized = F.normalize(lrt_hidden, p=2, dim=1)  # [K, D]
+            
+            # 2. 计算 Gram 矩阵 (相似度矩阵)
+            G = torch.mm(lrt_normalized, lrt_normalized.t())  # [K, K]
+            
+            # 3. 提取上三角部分 (不包括对角线)
+            # triu(G, diagonal=1) 获取严格上三角矩阵 (i < j)
+            upper_triangular = torch.triu(G, diagonal=1)  # [K, K]
+            
+            # 4. 计算相似度的平方和
+            # 只对上三角部分求和
+            similarity_squared_sum = (upper_triangular ** 2).sum()
+            
+            # 5. 归一化系数: 2 / (K * (K-1))
+            # 因为上三角有 K(K-1)/2 个元素
+            normalization = 2.0 / (K * (K - 1))
+            
+            # 6. 计算该组的正交损失
+            orth_loss = normalization * similarity_squared_sum
+            orth_losses.append(orth_loss)
+        
+        if len(orth_losses) == 0:
+            return torch.tensor(0.0, device=lrt_features[0].device)
+        
+        # 7. 对所有 Query 的正交损失取平均
+        return torch.stack(orth_losses).mean()
+    
     def encode_video_chunk(self, pixel_values_videos, video_grid_thw, combine_t_list):
         video_embeds = []
         start = 0
@@ -247,6 +386,9 @@ class Qwen2VLMRForConditionalGeneration(Qwen2VLForConditionalGeneration):
         multi_qa=False,
         attention_mask_multiqa=None,
         combine_t_list=None,
+        lrt_positions=None,
+        num_lrt_tokens=None,
+        relevant=None,
         **kwargs,
     ) -> Union[Tuple, Qwen2VLCausalLMOutputWithPast]:
         output_hidden_states = (
@@ -255,6 +397,14 @@ class Qwen2VLMRForConditionalGeneration(Qwen2VLForConditionalGeneration):
         return_dict = return_dict if return_dict is not None else self.config.use_return_dict
         if inputs_embeds is None:
             inputs_embeds = self.model.embed_tokens(input_ids)
+            # LRT Token 的可学习embedding替换
+            # 不存在self.training这个状态
+            if lrt_positions is not None and self.training:
+                inputs_embeds = inputs_embeds.clone()  # 创建副本
+                for batch_idx, sample_lrt_positions in enumerate(lrt_positions):
+                    for start_idx, end_idx in sample_lrt_positions:
+                        inputs_embeds[batch_idx, start_idx:end_idx] = self.lrt_embeddings  # OK
+
             if pixel_values is not None:
                 pixel_values = pixel_values.type(self.visual.get_dtype())
                 image_embeds = self.visual(pixel_values, grid_thw=image_grid_thw)
@@ -327,6 +477,9 @@ class Qwen2VLMRForConditionalGeneration(Qwen2VLForConditionalGeneration):
         logits = logits.float()
 
         loss = None
+        aux_cls_loss = None
+        aux_orth_loss = None
+
         if labels is not None:
             # Shift so that tokens < n predict n
             shift_logits = logits[..., :-1, :].contiguous()
@@ -338,6 +491,22 @@ class Qwen2VLMRForConditionalGeneration(Qwen2VLForConditionalGeneration):
             # Enable model parallelism
             shift_labels = shift_labels.to(shift_logits.device)
             loss = loss_fct(shift_logits, shift_labels)
+            # ========= 计算 LRT 相关损失 =========
+            if self.training and lrt_positions is not None:
+                # 提取 LRT hidden states
+                lrt_features = self.extract_lrt_hidden_states(hidden_states, lrt_positions)
+                
+                # 5.1 分类损失
+                aux_cls_loss = self.compute_lrt_classification_loss(
+                    lrt_features, labels, lrt_positions
+                )
+                
+                # 5.2 正交损失
+                aux_orth_loss = self.compute_lrt_orthogonality_loss(lrt_features)
+                
+                # 5.3 总损失
+                loss = loss + self.aux_cls_weight * aux_cls_loss + self.aux_orth_weight * aux_orth_loss
+
 
         if not return_dict:
             output = (logits,) + outputs[1:]
@@ -349,7 +518,7 @@ class Qwen2VLMRForConditionalGeneration(Qwen2VLForConditionalGeneration):
             past_key_values=outputs.past_key_values,
             hidden_states=outputs.hidden_states,
             attentions=outputs.attentions,
-            rope_deltas=self.rope_deltas,
+            rope_deltas=self.rope_deltas
         )
     
     def prepare_inputs_for_generation(

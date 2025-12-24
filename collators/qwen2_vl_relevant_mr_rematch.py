@@ -348,4 +348,8 @@ class Qwen2VLRelevantMRRematchDataCollator(BaseDataCollator):
             multi_qa=multi_qa,
             attention_mask_multiqa=attention_mask_multiqa,
             combine_t_list=combine_t_list,
+            #add
+            lrt_positions=lrt_positions,
+            num_lrt_tokens=self.num_lrt_tokens,
+            relevant=relevant
         )

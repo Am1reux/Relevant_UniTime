@@ -11,6 +11,19 @@ class ModelArguments:
     model_local_path: Optional[str] = field(default=None)
     model_finetune_path: Optional[str] = field(default=None)
 
+    num_lrt_tokens: int = field(
+        default=8,
+        metadata={"help": "Number of learnable relevance tokens per query"}
+    )
+    aux_cls_weight: float = field(
+        default=0.1,
+        metadata={"help": "Weight for auxiliary classification loss"}
+    )
+    aux_orth_weight: float = field(
+        default=0.01,
+        metadata={"help": "Weight for auxiliary orthogonality loss"}
+    )
+
     def __post_init__(self):
         assert self.model_id in MODEL_HF_PATH, f"Unknown model_id: {self.model_id}"
         self.model_hf_path: str = MODEL_HF_PATH[self.model_id]

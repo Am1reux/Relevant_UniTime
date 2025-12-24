@@ -66,9 +66,19 @@ def train():
         use_flash_attn=training_args.use_flash_attn,
         device_map=device_map,
     )
+
     model, tokenizer, processor, config = loader.load()
     tokenizer.model_max_length = training_args.model_max_length
 
+    # # 动态设置配置
+    # config.num_lrt_tokens = model_args.num_lrt_tokens
+    # config.aux_cls_weight = model_args.aux_cls_weight
+    # config.aux_orth_weight = model_args.aux_orth_weight
+
+    # # 更新模型属性
+    # model.num_lrt_tokens = config.num_lrt_tokens
+    # model.aux_cls_weight = config.aux_cls_weight
+    # model.aux_orth_weight = config.aux_orth_weight
 
     if training_args.gradient_checkpointing:
         model.enable_input_require_grads()
@@ -143,11 +153,18 @@ def train():
         
         # 确认一下如果新加入了lrt token 那么我应该怎么进行lora微调呢 
         # 我是解冻lrt token的emb 还是 全部的emb ?
-        lrt_token = "<|lrt|>"
-        lrt_id = tokenizer.convert_tokens_to_ids(lrt_token)
-        embedding = model.get_input_embeddings()
-        embedding.weight[lrt_id].requires_grad = True
+        # lrt_token = "<|lrt|>"
+        # lrt_id = tokenizer.convert_tokens_to_ids(lrt_token)
+        # embedding = model.get_input_embeddings()
+        # embedding.weight[lrt_id].requires_grad = True
         
+        model.base_model.model.lrt_embeddings.requires_grad = True
+        model.base_model.model.lrt_classifier.requires_grad_(True)
+        
+        rank0_print("LRT modules enabled for training:")
+        rank0_print("  - lrt_embeddings")
+        rank0_print("  - lrt_classifier")
+
         
     # load data
     rank0_print("Loading data...")
