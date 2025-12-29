@@ -1,4 +1,4 @@
-export CUDA_VISIBLE_DEVICES=2,3
+export CUDA_VISIBLE_DEVICES=0,1
 
 NUM_GPUS=2
 DISTRIBUTED_ARGS="
@@ -13,6 +13,7 @@ export DECORD_EOF_RETRY_MAX=20480
 MODEL_ID=qwen2-vl-7b-instruct
 model_local_path=/home/fwj/workspace/pretrain_model/Qwen/Qwen2-VL-7B-Instruct
 TRAIN_DATA_PATH=/home/fwj/workspace/code/UniTime/UniTime_data/charades/train.json
+# TRAIN_DATA_PATH=/home/fwj/workspace/code/UniTime/UniTime_data/charades/train_debug.json
 
 # EVAL_DATA_PATH=/home/fwj/workspace/code/UniTime/UniTime_data/charades/test.json
 EVAL_DATA_PATH=/home/fwj/workspace/code/UniTime/UniTime_data/charades/val2.0.json
@@ -32,11 +33,13 @@ TRAIN_VISION_PROJECTOR=False                            # whether train the visi
 
 USE_LORA=True                                           # whether use lora for llm
 Q_LORA=False                                            # whether use q-lora for llm; only effective when `USE_LORA` is True
-LORA_R=8                                                # the lora rank (both llm and vision encoder)
-LORA_ALPHA=8                                            # the lora alpha (both llm and vision encoder)
+LORA_R=32                                                # the lora rank (both llm and vision encoder)
+LORA_ALPHA=32                                            # the lora alpha (both llm and vision encoder)
 
 # RUN_ID=Relevant_Charades_frame1024_lora88_bsz2_LR2e4_epoch2_251218
-RUN_ID=Relevant_Charades_frame1024_lora328_bsz2_LR2e4_epoch2_rematch
+# RUN_ID=Relevant_Charades_frame1024_lora328_bsz2_LR2e4_epoch2_rematch_1
+RUN_ID=Relevant_Charades_frame1024_lora3232_bsz2_LR2e4_epoch2_rematch
+# RUN_ID=Relevant_Charades_frame1024_lora328_bsz2_LR2e4_epoch2_rematch_debug
 
 DS_STAGE=zero2                                          # deepspeed stage; < zero2 | zero3 >
 PER_DEVICE_BATCH_SIZE=1                                # batch size per GPU
@@ -48,8 +51,8 @@ MODEL_MAX_LEN=32768                                      # maximum input length 
 
 # argument  LRT param
 NUM_LRT_TOKENS=8
-AUX_CLS_WEIGHT=0.1
-AUX_ORTH_WEIGHT=0.1
+AUX_CLS_WEIGHT=0.5
+AUX_ORTH_WEIGHT=0.5
 
 torchrun $DISTRIBUTED_ARGS train_relevant.py \
     --model_id $MODEL_ID \

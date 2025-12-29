@@ -498,7 +498,7 @@ class Qwen2VLMRForConditionalGeneration(Qwen2VLForConditionalGeneration):
                 
                 # 5.1 分类损失
                 aux_cls_loss = self.compute_lrt_classification_loss(
-                    lrt_features, labels, lrt_positions
+                    lrt_features, relevant, lrt_positions
                 )
                 
                 # 5.2 正交损失

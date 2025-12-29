@@ -333,6 +333,7 @@ def inference_worker(rank, world_size, args):
     
     # Load model and processor
     device = torch.device(f"cuda:{rank}")
+    print(args.model_finetune_path)
     if args.model_finetune_path:
         model = Qwen2VLMRForConditionalGeneration.from_pretrained(
             args.model_finetune_path, 

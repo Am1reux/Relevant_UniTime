@@ -133,6 +133,10 @@ def train():
             rank0_print("Vision projector will be fully trained...")
             full_modules.extend(vision_projector_keys)
         
+        # lrt_token训练
+        full_modules.extend(['model.embed_tokens', 'lm_head'])
+        full_modules.extend(['lrt_embeddings', 'lrt_classifier'])
+        
 
         lora_config = LoraConfig(
             r=lora_args.lora_r,
@@ -217,7 +221,6 @@ def train():
     )
     trainer.train()
     trainer.save_state()
-
     safe_save_model_for_hf_trainer(trainer=trainer, output_dir=output_dir)
 
 if __name__ == "__main__":
