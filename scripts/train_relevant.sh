@@ -1,6 +1,6 @@
-export CUDA_VISIBLE_DEVICES=2,3
+export CUDA_VISIBLE_DEVICES=0,1,2
 
-NUM_GPUS=2
+NUM_GPUS=3
 DISTRIBUTED_ARGS="
     --nnodes=1 \
     --nproc_per_node ${NUM_GPUS} \
@@ -10,8 +10,10 @@ DISTRIBUTED_ARGS="
 
 export DECORD_EOF_RETRY_MAX=20480
 
-MODEL_ID=qwen2-vl-7b-instruct
-model_local_path=/home/fwj/workspace/pretrain_model/Qwen/Qwen2-VL-7B-Instruct
+# MODEL_ID=qwen2-vl-7b-instruct
+MODEL_ID=qwen2-vl-2b-instruct
+# model_local_path=/home/fwj/workspace/pretrain_model/Qwen/Qwen2-VL-7B-Instruct
+model_local_path=/home/fwj/workspace/pretrain_model/Qwen/Qwen2-VL-2B-Instruct
 TRAIN_DATA_PATH=/home/fwj/workspace/code/UniTime/UniTime_data/charades/train.json
 
 # EVAL_DATA_PATH=/home/fwj/workspace/code/UniTime/UniTime_data/charades/test.json
@@ -20,7 +22,8 @@ IMAGE_FOLDER=None
 
 VIDEO_FOLDER=/home/fwj/workspace/VisualSearch/charades/Charades_v1 #If you specified video_path in the data file, this can be set to none
 
-FEAT_FOLDER=/home/fwj/workspace/VisualSearch/unitime_feat/charades_7b #If you specified feature_path in the data file, this can be set to none
+# FEAT_FOLDER=/home/fwj/workspace/VisualSearch/unitime_feat/charades_7b #If you specified feature_path in the data file, this can be set to none
+FEAT_FOLDER=None #If you specified feature_path in the data file, this can be set to none
 
 
 FPS=2
@@ -32,10 +35,11 @@ TRAIN_VISION_PROJECTOR=False                            # whether train the visi
 
 USE_LORA=True                                           # whether use lora for llm
 Q_LORA=False                                            # whether use q-lora for llm; only effective when `USE_LORA` is True
-LORA_R=8                                                # the lora rank (both llm and vision encoder)
-LORA_ALPHA=8                                            # the lora alpha (both llm and vision encoder)
+LORA_R=32                                                # the lora rank (both llm and vision encoder)
+LORA_ALPHA=32                                            # the lora alpha (both llm and vision encoder)
 
-RUN_ID=Relevant_Charades_frame1024_lora88_bsz2_LR2e4_epoch2_251218
+# RUN_ID=Relevant_Charades_frame1024_lora88_bsz2_LR2e4_epoch2_251218
+RUN_ID=Relevant_charades_frame256_lora3232_bsz3_singleqa_LR2e4_epoch2
 
 DS_STAGE=zero2                                          # deepspeed stage; < zero2 | zero3 >
 PER_DEVICE_BATCH_SIZE=1                                # batch size per GPU

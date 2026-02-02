@@ -41,6 +41,7 @@ def cleanup():
     dist.destroy_process_group()
 
 # 完成推理代码
+# 第一个版本的推理结果解析
 def extract_relevant(sentences):
     """
     Extract relevance and predictions from output text.
@@ -70,6 +71,36 @@ def extract_relevant(sentences):
     predictions = pad_sequence(predictions_list, batch_first=True, padding_value=PAD_IDX)
     
     return relevance_flags, predictions
+# 第二个版本的推理:格式规范化后
+# def extract_relevant(sentences):
+#     """
+#     Extract relevance and predictions from output text.
+#     Returns: list of tuples (is_relevant: bool, predictions: torch.Tensor)
+#     """
+#     results = []
+#     for sentence in sentences:
+#         # Check if "No relevance" appears in the sentence (case insensitive)
+#         if re.search(r"^no,?\s+from\s+-1s?\s+to\s+-1s?", sentence):
+#             # Not relevant, return empty predictions
+#             results.append((False, torch.tensor([PAD_IDX])))
+#         else:
+#             # Relevant, extract time values
+#             matches = re.findall(r"(\d+(\.\d+)?)", sentence)
+#             if matches:
+#                 predictions = torch.tensor([float(match[0]) for match in matches])
+#                 results.append((True, predictions))
+#             else:
+#                 # Relevant but no time found, treat as empty
+#                 results.append((True, torch.tensor([PAD_IDX])))
+    
+#     # Separate relevance flags and predictions
+#     relevance_flags = [r[0] for r in results]
+#     predictions_list = [r[1] for r in results]
+    
+#     # Pad predictions
+#     predictions = pad_sequence(predictions_list, batch_first=True, padding_value=PAD_IDX)
+    
+#     return relevance_flags, predictions
 
 def extract_time(sentences):
     results = []
@@ -102,15 +133,14 @@ def to_window_list_pred_vr(pred):
         return [-1]
     return window_list
 
-
+# 第一个版本推理的提示词
 def construct_messages_mr_fps(video_path, feature_path, fps, retrieval_segment, retrieval_mode, clip_length):
     if retrieval_mode == 'mr_seg':
         message = [
             {
                 "role": "user",
                 "content": [
-                    {"type": "video", "video": f"{video_path}", "fps": fps, "video_start": retrieval_segment[0], "video_end": retrieval_segment[1], 
-                        "feature": f"{feature_path}", "num_clips": 1, "clip_length": clip_length},
+                    {"type": "video", "video": f"{video_path}", "fps": fps, "video_start": retrieval_segment[0], "video_end": retrieval_segment[1]},
                     {"type": "text", "text": f"This is a sequence interleaved with timestamps and frames. Your task is to answer the query based on the video content. If the query is relevant to the video, identify the specific timestamp(s) when the given query appears. If the query is not relevant to the video, answer \'No relevance.\'"}                
                 ]
             },
@@ -126,6 +156,29 @@ def construct_messages_mr_fps(video_path, feature_path, fps, retrieval_segment, 
             },
         ]
     return message
+# 第二个版本：规范化后的推理的提示词
+# def construct_messages_mr_fps(video_path, feature_path, fps, retrieval_segment, retrieval_mode, clip_length):
+#     if retrieval_mode == 'mr_seg':
+#         message = [
+#             {
+#                 "role": "user",
+#                 "content": [
+#                     {"type": "video", "video": f"{video_path}", "fps": fps, "video_start": retrieval_segment[0], "video_end": retrieval_segment[1]},
+#                     {"type": "text", "text": f"This is a sequence interleaved with timestamps and frames. Your task is to answer the query based on the video content. If the query is relevant to the video, answer in the format: \'Yes, From <start>s to <end>s .\'. If the query is not relevant to the video, answer \'No, from -1s to -1s.\'"}                
+#                 ]
+#             },
+#         ]
+#     elif retrieval_mode == 'mr':
+#         message = [
+#             {
+#                 "role": "user",
+#                 "content": [
+#                     {"type": "video", "video": f"{video_path}", "fps": fps, "video_start": retrieval_segment[0], "video_end": retrieval_segment[1]},
+#                     {"type": "text", "text": f"This is a sequence interleaved with timestamps and frames. Your task is to answer the query based on the video content. If the query is relevant to the video, answer in the format: \'Yes, From <start>s to <end>s .\'. If the query is not relevant to the video, answer \'No, from -1s to -1s.\'"}                    
+#                 ]
+#             },
+#         ]
+#     return message
 
 
 def run_inference(model, processor, data, args, device):

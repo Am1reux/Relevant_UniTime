@@ -39,7 +39,8 @@ def feature(model, processor, video_path, feature_root):
         # frame_idx = [i for i in range(0, len(vr), int(video_fps / sample_fps))]
         nframes_2fps = round_by_factor(int(total_frames / video_fps * FPS), FRAME_FACTOR)
 
-        video_total_pixels = 1024 * 16 * 28 * 28
+        # video_total_pixels = 1024 * 16 * 28 * 28
+        video_total_pixels = 256 * 16 * 28 * 28
         video_min_pixels = 16 * 28 * 28
         video_max_pixels = 768 * 28 * 28
         image_factor = 28

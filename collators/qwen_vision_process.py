@@ -33,10 +33,10 @@ FRAME_FACTOR = 2
 FPS = 2.0
 FPS_MIN_FRAMES = 4
 FPS_MAX_FRAMES = 128 * 2
-# orginal
-VIDEO_TOTAL_PIXELS = 1024 * 16 * 28 * 28
-# now
-# VIDEO_TOTAL_PIXELS = 512 * 16 * 28 * 28
+# # orginal
+# VIDEO_TOTAL_PIXELS = 1024 * 16 * 28 * 28
+# best
+VIDEO_TOTAL_PIXELS = 256 * 16 * 28 * 28
 MAX_FRAMES = 1024
 
 def round_by_factor(number: int, factor: int) -> int:
