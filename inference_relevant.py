@@ -42,36 +42,6 @@ def cleanup():
 
 # 完成推理代码
 # 第一个版本的推理结果解析
-def extract_relevant(sentences):
-    """
-    Extract relevance and predictions from output text.
-    Returns: list of tuples (is_relevant: bool, predictions: torch.Tensor)
-    """
-    results = []
-    for sentence in sentences:
-        # Check if "No relevance" appears in the sentence (case insensitive)
-        if re.search(r"no\s+relevance", sentence, re.IGNORECASE):
-            # Not relevant, return empty predictions
-            results.append((False, torch.tensor([PAD_IDX])))
-        else:
-            # Relevant, extract time values
-            matches = re.findall(r"(\d+(\.\d+)?)", sentence)
-            if matches:
-                predictions = torch.tensor([float(match[0]) for match in matches])
-                results.append((True, predictions))
-            else:
-                # Relevant but no time found, treat as empty
-                results.append((True, torch.tensor([PAD_IDX])))
-    
-    # Separate relevance flags and predictions
-    relevance_flags = [r[0] for r in results]
-    predictions_list = [r[1] for r in results]
-    
-    # Pad predictions
-    predictions = pad_sequence(predictions_list, batch_first=True, padding_value=PAD_IDX)
-    
-    return relevance_flags, predictions
-# 第二个版本的推理:格式规范化后
 # def extract_relevant(sentences):
 #     """
 #     Extract relevance and predictions from output text.
@@ -80,7 +50,7 @@ def extract_relevant(sentences):
 #     results = []
 #     for sentence in sentences:
 #         # Check if "No relevance" appears in the sentence (case insensitive)
-#         if re.search(r"^no,?\s+from\s+-1s?\s+to\s+-1s?", sentence):
+#         if re.search(r"no\s+relevance", sentence, re.IGNORECASE):
 #             # Not relevant, return empty predictions
 #             results.append((False, torch.tensor([PAD_IDX])))
 #         else:
@@ -101,6 +71,36 @@ def extract_relevant(sentences):
 #     predictions = pad_sequence(predictions_list, batch_first=True, padding_value=PAD_IDX)
     
 #     return relevance_flags, predictions
+# 第二个版本的推理:格式规范化后
+def extract_relevant(sentences):
+    """
+    Extract relevance and predictions from output text.
+    Returns: list of tuples (is_relevant: bool, predictions: torch.Tensor)
+    """
+    results = []
+    for sentence in sentences:
+        # Check if "No relevance" appears in the sentence (case insensitive)
+        if re.search(r"^no,?\s+from\s+-1s?\s+to\s+-1s?", sentence):
+            # Not relevant, return empty predictions
+            results.append((False, torch.tensor([PAD_IDX])))
+        else:
+            # Relevant, extract time values
+            matches = re.findall(r"(\d+(\.\d+)?)", sentence)
+            if matches:
+                predictions = torch.tensor([float(match[0]) for match in matches])
+                results.append((True, predictions))
+            else:
+                # Relevant but no time found, treat as empty
+                results.append((True, torch.tensor([PAD_IDX])))
+    
+    # Separate relevance flags and predictions
+    relevance_flags = [r[0] for r in results]
+    predictions_list = [r[1] for r in results]
+    
+    # Pad predictions
+    predictions = pad_sequence(predictions_list, batch_first=True, padding_value=PAD_IDX)
+    
+    return relevance_flags, predictions
 
 def extract_time(sentences):
     results = []

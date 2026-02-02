@@ -89,36 +89,13 @@ class VideoCentricDataset(Dataset):
         #     ]
 
         # 第一个版本的提示词
-        if retrieval_mode == 'mr_seg':
-            message = [
-                {
-                    "role": "user",
-                    "content": [
-                        {"type": "video", "video": f"{video_path}", "fps": fps, "video_start": retrieval_segment[0], "video_end": retrieval_segment[1]},
-                        {"type": "text", "text": f"This is a sequence interleaved with timestamps and frames. Your task is to answer the query based on the video content. If the query is relevant to the video, identify the specific timestamp(s) when the given query appears. If the query is not relevant to the video, answer \'No relevance.\'"}
-                    ]
-                },
-            ]
-        elif retrieval_mode == 'mr':
-            message = [
-                {
-                    "role": "user",
-                    "content": [
-                        {"type": "video", "video": f"{video_path}", "fps": fps, "video_start": retrieval_segment[0], "video_end": retrieval_segment[1]},
-                        {"type": "text", "text": f"This is a sequence interleaved with timestamps and frames. Your task is to answer the query based on the video content. If the query is relevant to the video, identify the temporal window (start and end timestamps) where it occurs. If the query is not relevant to the video, answer \'No relevance.\'"}
-                    ]
-                },
-            ]
-        
-
-        # 第二个版本的提示词：优化过定位
         # if retrieval_mode == 'mr_seg':
         #     message = [
         #         {
         #             "role": "user",
         #             "content": [
         #                 {"type": "video", "video": f"{video_path}", "fps": fps, "video_start": retrieval_segment[0], "video_end": retrieval_segment[1]},
-        #                 {"type": "text", "text": f"This is a sequence interleaved with timestamps and frames. Your task is to answer the query based on the video content. If the query is relevant to the video, answer in the format: \'Yes, From <start>s to <end>s .\'. If the query is not relevant to the video, answer \'No, from -1s to -1s\'"}
+        #                 {"type": "text", "text": f"This is a sequence interleaved with timestamps and frames. Your task is to answer the query based on the video content. If the query is relevant to the video, identify the specific timestamp(s) when the given query appears. If the query is not relevant to the video, answer \'No relevance.\'"}
         #             ]
         #         },
         #     ]
@@ -128,21 +105,44 @@ class VideoCentricDataset(Dataset):
         #             "role": "user",
         #             "content": [
         #                 {"type": "video", "video": f"{video_path}", "fps": fps, "video_start": retrieval_segment[0], "video_end": retrieval_segment[1]},
-        #                 {"type": "text", "text": f"This is a sequence interleaved with timestamps and frames. Your task is to answer the query based on the video content. If the query is relevant to the video, answer in the format: \'Yes, From <start>s to <end>s .\'. If the query is not relevant to the video, answer \'No, from -1s to -1s.\'"}
+        #                 {"type": "text", "text": f"This is a sequence interleaved with timestamps and frames. Your task is to answer the query based on the video content. If the query is relevant to the video, identify the temporal window (start and end timestamps) where it occurs. If the query is not relevant to the video, answer \'No relevance.\'"}
         #             ]
         #         },
         #     ]
+        
 
-        # for query in querys:
-        #     message.append(
-        #         {
-        #         "role": "user",
-        #         "content": [
-        #             {"type": "text", "text": f"Query:{query}\nAnswer: "}
-        #         ]
-        #     }
-        #     )
-        # return message
+        # 第二个版本的提示词：优化过定位
+        if retrieval_mode == 'mr_seg':
+            message = [
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "video", "video": f"{video_path}", "fps": fps, "video_start": retrieval_segment[0], "video_end": retrieval_segment[1]},
+                        {"type": "text", "text": f"This is a sequence interleaved with timestamps and frames. Your task is to answer the query based on the video content. If the query is relevant to the video, answer in the format: \'Yes, From <start>s to <end>s .\'. If the query is not relevant to the video, answer \'No, from -1s to -1s\'"}
+                    ]
+                },
+            ]
+        elif retrieval_mode == 'mr':
+            message = [
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "video", "video": f"{video_path}", "fps": fps, "video_start": retrieval_segment[0], "video_end": retrieval_segment[1]},
+                        {"type": "text", "text": f"This is a sequence interleaved with timestamps and frames. Your task is to answer the query based on the video content. If the query is relevant to the video, answer in the format: \'Yes, From <start>s to <end>s .\'. If the query is not relevant to the video, answer \'No, from -1s to -1s.\'"}
+                    ]
+                },
+            ]
+
+        for query in querys:
+            message.append(
+                {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": f"Query:{query}\nAnswer: "}
+                ]
+            }
+            )
+        return message
     
     def sample_negative_query(self, cur_vid, num_samples):
         candidate_queries = [q['query'] for q in self.query_pool if q['vid'] != cur_vid]

@@ -39,7 +39,8 @@ LORA_R=32                                                # the lora rank (both l
 LORA_ALPHA=32                                            # the lora alpha (both llm and vision encoder)
 
 # RUN_ID=Relevant_Charades_frame1024_lora88_bsz2_LR2e4_epoch2_251218
-RUN_ID=Relevant_charades_frame256_lora3232_bsz3_singleqa_LR2e4_epoch2
+# RUN_ID=Relevant_charades_frame256_lora3232_bsz3_singleqa_LR2e4_epoch2
+RUN_ID=Relevant_charades_frame256_lora3232_bsz3_LR2e4_epoch2_RL_SFT1
 
 DS_STAGE=zero2                                          # deepspeed stage; < zero2 | zero3 >
 PER_DEVICE_BATCH_SIZE=1                                # batch size per GPU

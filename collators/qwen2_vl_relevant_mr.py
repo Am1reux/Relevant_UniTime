@@ -93,47 +93,6 @@ class Qwen2VLRelevantMRDataCollator(BaseDataCollator):
         all_timestamps = [[f"timestamp: {all_t} seconds; feature: " for all_t in sublist] for sublist in all_timestamps_num]
         
         ## 第一个版本的标签
-        if mode == 'mr_seg':
-            for msg, rel, all_t, all_t_o, windows in zip(messages, relevant, all_timestamps_num, all_timestamps_origin, temporal_window):
-                num_query = 0
-                for r, t_w in zip(rel, windows):
-                    if r:
-                        sub_evaluate_labels = []
-                        for t_w_i in t_w:
-                            segment_start_idx, segment_end_idx = find_segments(all_t_o, t_w_i)
-                            sub_evaluate_labels.extend([all_t[iii] for iii in range(segment_start_idx, segment_end_idx + 1)])
-                        interval_text = "yes"
-                        interval_text += ", ".join([f"{s} seconds" for s in sub_evaluate_labels])
-                        interval_text = interval_text + "."
-                        msg.insert(2*num_query+2, {"role": "assistant", "content": [{"type": "text", "text": f"{interval_text}"}]})
-                        num_query += 1
-                    else:
-                        interval_text = "No relevance."
-                        msg.insert(2*num_query+2, {"role": "assistant", "content": [{"type": "text", "text": f"{interval_text}"}]})
-                        num_query += 1
-        else:
-            for msg, rel, all_t, all_t_o, windows in zip(messages, relevant, all_timestamps_num, all_timestamps_origin, temporal_window):
-                num_query = 0
-                for r, t_w in zip(rel, windows):
-                    #如果相关：
-                    if r:
-                        # intetval_texts就插入正确的时刻段
-                        sub_evaluate_labels = []
-                        for t_w_i in t_w:
-                            is_inside, s_t_i, e_t_i, s_t_idx, e_t_idx = find_closest_timestamps(all_t_o,t_w_i)
-                            sub_evaluate_labels.append([all_t[s_t_idx], all_t[e_t_idx]])
-                        interval_text = "yes"
-                        interval_text += ", ".join([f"from {s} seconds to {e} seconds" for s, e in sub_evaluate_labels])
-                        interval_text = interval_text[0].upper() + interval_text[1:] + "."
-                        msg.insert(2*num_query+2, {"role": "assistant", "content": [{"type": "text", "text": f"{interval_text}"}]})
-                        num_query += 1
-                    #如果不相关：
-                    else:
-                        # inetrval_texts就插入No relevance.
-                        interval_text = "No relevance."
-                        msg.insert(2*num_query+2, {"role": "assistant", "content": [{"type": "text", "text": f"{interval_text}"}]})
-                        num_query += 1
-        ### 第二个版本的标签:规范化后的提示词
         # if mode == 'mr_seg':
         #     for msg, rel, all_t, all_t_o, windows in zip(messages, relevant, all_timestamps_num, all_timestamps_origin, temporal_window):
         #         num_query = 0
@@ -143,13 +102,13 @@ class Qwen2VLRelevantMRDataCollator(BaseDataCollator):
         #                 for t_w_i in t_w:
         #                     segment_start_idx, segment_end_idx = find_segments(all_t_o, t_w_i)
         #                     sub_evaluate_labels.extend([all_t[iii] for iii in range(segment_start_idx, segment_end_idx + 1)])
-        #                 interval_text = "Yes"
+        #                 interval_text = "yes"
         #                 interval_text += ", ".join([f"{s} seconds" for s in sub_evaluate_labels])
         #                 interval_text = interval_text + "."
         #                 msg.insert(2*num_query+2, {"role": "assistant", "content": [{"type": "text", "text": f"{interval_text}"}]})
         #                 num_query += 1
         #             else:
-        #                 interval_text = "No, from -1s to -1s."
+        #                 interval_text = "No relevance."
         #                 msg.insert(2*num_query+2, {"role": "assistant", "content": [{"type": "text", "text": f"{interval_text}"}]})
         #                 num_query += 1
         # else:
@@ -163,7 +122,7 @@ class Qwen2VLRelevantMRDataCollator(BaseDataCollator):
         #                 for t_w_i in t_w:
         #                     is_inside, s_t_i, e_t_i, s_t_idx, e_t_idx = find_closest_timestamps(all_t_o,t_w_i)
         #                     sub_evaluate_labels.append([all_t[s_t_idx], all_t[e_t_idx]])
-        #                 interval_text = "Yes"
+        #                 interval_text = "yes"
         #                 interval_text += ", ".join([f"from {s} seconds to {e} seconds" for s, e in sub_evaluate_labels])
         #                 interval_text = interval_text[0].upper() + interval_text[1:] + "."
         #                 msg.insert(2*num_query+2, {"role": "assistant", "content": [{"type": "text", "text": f"{interval_text}"}]})
@@ -171,9 +130,51 @@ class Qwen2VLRelevantMRDataCollator(BaseDataCollator):
         #             #如果不相关：
         #             else:
         #                 # inetrval_texts就插入No relevance.
-        #                 interval_text = "No, from -1s to -1s."
+        #                 interval_text = "No relevance."
         #                 msg.insert(2*num_query+2, {"role": "assistant", "content": [{"type": "text", "text": f"{interval_text}"}]})
         #                 num_query += 1
+        ### 第二个版本的标签:规范化后的提示词
+        if mode == 'mr_seg':
+            for msg, rel, all_t, all_t_o, windows in zip(messages, relevant, all_timestamps_num, all_timestamps_origin, temporal_window):
+                num_query = 0
+                for r, t_w in zip(rel, windows):
+                    if r:
+                        sub_evaluate_labels = []
+                        for t_w_i in t_w:
+                            segment_start_idx, segment_end_idx = find_segments(all_t_o, t_w_i)
+                            sub_evaluate_labels.extend([all_t[iii] for iii in range(segment_start_idx, segment_end_idx + 1)])
+                        interval_text = "Yes"
+                        # interval_text += ", ".join([f"{s} seconds" for s in sub_evaluate_labels])
+                        interval_text += ", ".join([f"from {s} seconds to {e} seconds" for s, e in sub_evaluate_labels])
+                        interval_text = interval_text + "."
+                        msg.insert(2*num_query+2, {"role": "assistant", "content": [{"type": "text", "text": f"{interval_text}"}]})
+                        num_query += 1
+                    else:
+                        interval_text = "No, from -1s to -1s."
+                        msg.insert(2*num_query+2, {"role": "assistant", "content": [{"type": "text", "text": f"{interval_text}"}]})
+                        num_query += 1
+        else:
+            for msg, rel, all_t, all_t_o, windows in zip(messages, relevant, all_timestamps_num, all_timestamps_origin, temporal_window):
+                num_query = 0
+                for r, t_w in zip(rel, windows):
+                    #如果相关：
+                    if r:
+                        # intetval_texts就插入正确的时刻段
+                        sub_evaluate_labels = []
+                        for t_w_i in t_w:
+                            is_inside, s_t_i, e_t_i, s_t_idx, e_t_idx = find_closest_timestamps(all_t_o,t_w_i)
+                            sub_evaluate_labels.append([all_t[s_t_idx], all_t[e_t_idx]])
+                        interval_text = "Yes"
+                        interval_text += ", ".join([f"from {s} seconds to {e} seconds" for s, e in sub_evaluate_labels])
+                        interval_text = interval_text[0].upper() + interval_text[1:] + "."
+                        msg.insert(2*num_query+2, {"role": "assistant", "content": [{"type": "text", "text": f"{interval_text}"}]})
+                        num_query += 1
+                    #如果不相关：
+                    else:
+                        # inetrval_texts就插入No relevance.
+                        interval_text = "No, from -1s to -1s."
+                        msg.insert(2*num_query+2, {"role": "assistant", "content": [{"type": "text", "text": f"{interval_text}"}]})
+                        num_query += 1
 
         texts = [
             self.processor.apply_chat_template(msg, tokenize=False, add_generation_prompt=False)
