@@ -1,115 +1,124 @@
 import re
-import torch
+import math
 
-def calculate_iou(pred_window, gt_windows):
+def extract_timestamps(text):
     """
-    计算预测窗口与所有GT窗口的最大IoU
-    pred_window: [start, end]
-    gt_windows: List[[start, end]]
+    通用函数：从文本中提取所有浮点数时间戳。
+    例如: "Yes, 10.5, 20.0" -> [10.5, 20.0]
+          "From 10s to 20s" -> [10.0, 20.0]
     """
-    if pred_window[0] == -1: return 0.0
+    matches = re.findall(r"(\d+(?:\.\d+)?)", text)
+    return [float(m[0]) for m in matches]
+
+def compute_iou(box1, box2):
+    """
+    计算两个 [start, end] 区间的 IoU
+    """
+    s1, e1 = box1
+    s2, e2 = box2
+    
+    inter_s = max(s1, s2)
+    inter_e = min(e1, e2)
+    intersection = max(0, inter_e - inter_s)
+    
+    union = (e1 - s1) + (e2 - s2) - intersection
+    
+    if union > 0:
+        return intersection / union
+    return 0.0
+
+def compute_mr_reward(pred_timestamps, gt_windows):
+    """
+    MR 模式：标准 IoU。
+    如果预测了多段，这里简化为与任意 GT 的最大 IoU。
+    """
+    if len(pred_timestamps) < 2: return 0.0 # 格式错误，没预测出两个点
+    
+    # 假设前两个数字是 start, end
+    pred_box = [pred_timestamps[0], pred_timestamps[1]]
     
     max_iou = 0.0
-    p_s, p_e = pred_window
-    
-    # 防止预测出 end < start 的情况
-    if p_e < p_s: return 0.0
-
-    for idx, window in enumerate(gt_windows):
-        # 兼容 gt_windows 可能是 [[s, e], ...] 也可能是 [[[s,e]]] 嵌套的情况
-        if isinstance(window[0], list): g_s, g_e = window[0]
-        else: g_s, g_e = window
-            
-        inter_s = max(p_s, g_s)
-        inter_e = min(p_e, g_e)
-        intersection = max(0, inter_e - inter_s)
-        union = (p_e - p_s) + (g_e - g_s) - intersection
+    for gt in gt_windows:
+        # 兼容 gt 可能是 [[s,e]] 嵌套列表
+        if isinstance(gt[0], list): gt_box = gt[0]
+        else: gt_box = gt
         
-        if union > 0:
-            iou = intersection / union
-            max_iou = max(max_iou, iou)
-            
+        iou = compute_iou(pred_box, gt_box)
+        max_iou = max(max_iou, iou)
+        
     return max_iou
 
-def extract_content(text):
+def compute_mr_seg_reward(pred_timestamps, gt_windows):
     """
-    解析模型输出
-    期望格式: Yes, From 10.5s to 20s.
-    或者: No, From -1s to -1s.
+    MR_Seg 模式：Min-Max 外包框 IoU。
+    完美模拟推理时的粗定位逻辑。
     """
-    # 稍微放宽一点正则，允许大小写和少量的空格容错，但结构必须对
-    # 捕获组: 1=(Yes|No), 2=Start, 3=End
-    pattern = r"(Yes|No),?\s+[Ff]rom\s+(-?[\d\.]+)\s*s?\s+to\s+(-?[\d\.]+)\s*s?"
-    match = re.search(pattern, text)
-    if match:
-        is_pos = match.group(1).lower() == "yes"
-        try:
-            s_time = float(match.group(2))
-            e_time = float(match.group(3))
-            return is_pos, [s_time, e_time]
-        except:
-            return None, None
-    return None, None
-
-def relevance_reward_func(completions, relevant, **kwargs):
-    """相关性判别奖励: TP/TN给正分, FP/FN给负分"""
-    rewards = []
-    for text, gt_rel in zip(completions, relevant):
-        pred_rel, _ = extract_content(text)
-        if pred_rel is None: # 格式错误
-            rewards.append(0.0) 
-            continue
+    if not pred_timestamps: return 0.0
+    
+    # 1. 构建预测外包框
+    # 按照推理逻辑，取 min 和 max
+    p_min = min(pred_timestamps)
+    p_max = max(pred_timestamps)
+    
+    # 增加 buffer (模拟推理时的扩张 / 防止单点宽度为0)
+    buffer = 1.0 
+    pred_box = [max(0, p_min - buffer), p_max + buffer]
+    
+    # 2. 构建 GT 全局外包框
+    gt_starts = []
+    gt_ends = []
+    for gt in gt_windows:
+        if isinstance(gt[0], list): s, e = gt[0]
+        else: s, e = gt
+        gt_starts.append(s)
+        gt_ends.append(e)
         
-        # 二分类奖励
-        if pred_rel == gt_rel:
-            rewards.append(1.0)
-        else:
-            rewards.append(-1.0)
-    return rewards
+    if not gt_starts: return 0.0
+    
+    gt_global_box = [min(gt_starts), max(gt_ends)]
+    
+    # 3. 计算两者 IoU
+    return compute_iou(pred_box, gt_global_box)
 
-def iou_reward_func(completions, relevant, temporal_window, **kwargs):
-    """时序定位奖励: 仅在 TP (True Positive) 时计算 IoU"""
+def unified_reward_func(completions, relevant, temporal_window, mode, **kwargs):
+    """
+    统一奖励函数入口
+    """
     rewards = []
-    for text, gt_rel, gt_wins in zip(completions, relevant, temporal_window):
-        pred_rel, pred_win = extract_content(text)
+    
+    for i, text in enumerate(completions):
+        gt_rel = relevant[i]
+        gt_wins = temporal_window[i]
+        # 处理 batch 中 mode 可能不一致的情况 (虽然通常是一个 batch 一种 mode)
+        current_mode = mode[i] if isinstance(mode, list) else mode
         
-        # 只有当 GT是相关 且 预测也是相关 时，才计算IoU
-        if gt_rel and pred_rel: 
-            iou = calculate_iou(pred_win, gt_wins)
-            rewards.append(2.0 * iou) # alpha = 2.0
+        # --- [1] 分类奖励 ---
+        # 你的逻辑: 负样本包含 "no relevance" (忽略大小写)
+        is_pred_neg = bool(re.search(r"no\s+relevance", text, re.IGNORECASE))
+        is_pred_pos = not is_pred_neg
+        
+        rel_score = 0.0
+        if is_pred_pos == gt_rel:
+            rel_score = 1.0 # 分类正确
         else:
-            rewards.append(0.0)
-    return rewards
-
-def format_reward_func(completions, **kwargs):
-    """格式一致性奖励: 符合正则给分"""
-    rewards = []
-    for text in completions:
-        pred_rel, _ = extract_content(text)
-        if pred_rel is not None:
-            rewards.append(0.5) # 格式正确奖励
-        else:
-            rewards.append(-0.5) # 格式错误惩罚
-    return rewards
-
-def logic_reward_func(completions, **kwargs):
-    """逻辑性判别: 惩罚自相矛盾"""
-    rewards = []
-    for text in completions:
-        pred_rel, pred_win = extract_content(text)
-        if pred_rel is None:
-            rewards.append(0.0)
+            rewards.append(-1.0) # 分类错误，直接 -1 并退出
             continue
             
-        is_dummy = (pred_win[0] == -1 and pred_win[1] == -1)
-        
-        # 矛盾A: 说 No (pred_rel=False)，但给了具体时间 (not is_dummy)
-        if (not pred_rel) and (not is_dummy):
-            rewards.append(-1.0)
-        # 矛盾B: 说 Yes (pred_rel=True)，但给了 -1 (is_dummy)
-        elif pred_rel and is_dummy:
-            rewards.append(-1.0)
-        else:
-            rewards.append(0.0)
+        # --- [2] 定位奖励 (仅 TP 样本) ---
+        loc_score = 0.0
+        if gt_rel: # 只有相关样本才计算 IoU
+            pred_times = extract_timestamps(text)
             
+            if current_mode == 'mr':
+                loc_score = compute_mr_reward(pred_times, gt_wins)
+            elif current_mode == 'mr_seg':
+                loc_score = compute_mr_seg_reward(pred_times, gt_wins)
+        
+        # 总分加权: alpha * IoU
+        # 分类分保底 + 定位分奖励
+        # 示例: alpha = 2.0，最大奖励 = 1.0 + 2.0 = 3.0
+        alpha = 2.0
+        total_score = rel_score + alpha * loc_score
+        rewards.append(total_score)
+        
     return rewards

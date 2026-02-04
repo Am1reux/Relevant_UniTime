@@ -118,7 +118,7 @@ class VideoCentricDataset(Dataset):
                     "role": "user",
                     "content": [
                         {"type": "video", "video": f"{video_path}", "fps": fps, "video_start": retrieval_segment[0], "video_end": retrieval_segment[1]},
-                        {"type": "text", "text": f"This is a sequence interleaved with timestamps and frames. Your task is to answer the query based on the video content. If the query is relevant to the video, answer in the format: \'Yes, From <start>s to <end>s .\'. If the query is not relevant to the video, answer \'No, from -1s to -1s\'"}
+                        {"type": "text", "text": f"This is a sequence interleaved with timestamps and frames. Your task is to answer the query based on the video content. If the query is relevant to the video, answer in the format: \'Yes, From <start>s to <end>s .\'. If the query is not relevant to the video, answer \'No Relevance.\'"}
                     ]
                 },
             ]
@@ -128,7 +128,7 @@ class VideoCentricDataset(Dataset):
                     "role": "user",
                     "content": [
                         {"type": "video", "video": f"{video_path}", "fps": fps, "video_start": retrieval_segment[0], "video_end": retrieval_segment[1]},
-                        {"type": "text", "text": f"This is a sequence interleaved with timestamps and frames. Your task is to answer the query based on the video content. If the query is relevant to the video, answer in the format: \'Yes, From <start>s to <end>s .\'. If the query is not relevant to the video, answer \'No, from -1s to -1s.\'"}
+                        {"type": "text", "text": f"This is a sequence interleaved with timestamps and frames. Your task is to answer the query based on the video content. If the query is relevant to the video, answer in the format: \'Yes, From <start>s to <end>s .\'. If the query is not relevant to the video, answer \'No Relevance.\'"}
                     ]
                 },
             ]

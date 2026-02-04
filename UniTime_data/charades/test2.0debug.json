@@ -1,0 +1,40 @@
+[
+  {
+    "qid": 1,
+    "id": "00T1E",
+    "annos": [
+      {
+        "query": "person close the laptop.",
+        "window": [
+          [
+            0.7,
+            6.3
+          ]
+        ],
+        "relevant": true
+      }
+    ],
+    "duration": 19.04,
+    "mode": "mr",
+    "video_path": "/media/disk2/fwj/VisualSearch/charades/videos/00T1E.mp4"
+  },
+  {
+    "qid": 2,
+    "id": "00T1E",
+    "annos": [
+      {
+        "query": "person puts on shoes.",
+        "window": [
+          [
+            4.3,
+            12.0
+          ]
+        ],
+        "relevant": true
+      }
+    ],
+    "duration": 19.04,
+    "mode": "mr",
+    "video_path": "/media/disk2/fwj/VisualSearch/charades/videos/00T1E.mp4"
+  }
+]

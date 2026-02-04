@@ -1,6 +1,6 @@
-export CUDA_VISIBLE_DEVICES=0,1,2
+export CUDA_VISIBLE_DEVICES=0,1,2,3
 
-NUM_GPUS=3
+NUM_GPUS=4
 DISTRIBUTED_ARGS="
     --nnodes=1 \
     --nproc_per_node ${NUM_GPUS} \
@@ -14,13 +14,18 @@ export DECORD_EOF_RETRY_MAX=20480
 MODEL_ID=qwen2-vl-2b-instruct
 # model_local_path=/home/fwj/workspace/pretrain_model/Qwen/Qwen2-VL-7B-Instruct
 model_local_path=/home/fwj/workspace/pretrain_model/Qwen/Qwen2-VL-2B-Instruct
-TRAIN_DATA_PATH=/home/fwj/workspace/code/UniTime/UniTime_data/charades/train.json
+# TRAIN_DATA_PATH=/home/fwj/workspace/code/UniTime/UniTime_data/charades/train.json
+# TRAIN_DATA_PATH=/home/fwj/workspace/code/UniTime/UniTime_data/charades/train.json
+TRAIN_DATA_PATH=/home/fwj/workspace/code/UniTime/UniTime_data/qvhl/train.json
+# TRAIN_DATA_PATH=./train_debug.json
 
 # EVAL_DATA_PATH=/home/fwj/workspace/code/UniTime/UniTime_data/charades/test.json
-EVAL_DATA_PATH=/home/fwj/workspace/code/UniTime/UniTime_data/charades/val2.0.json
+# EVAL_DATA_PATH=/home/fwj/workspace/code/UniTime/UniTime_data/charades/val2.0.json
+EVAL_DATA_PATH=/home/fwj/workspace/code/UniTime/UniTime_data/qvhl/test2.0.json
 IMAGE_FOLDER=None
 
-VIDEO_FOLDER=/home/fwj/workspace/VisualSearch/charades/Charades_v1 #If you specified video_path in the data file, this can be set to none
+# VIDEO_FOLDER=/home/fwj/workspace/VisualSearch/charades/Charades_v1 #If you specified video_path in the data file, this can be set to none
+VIDEO_FOLDER=/home/fwj/workspace/VisualSearch/qvhighlight/videos #If you specified video_path in the data file, this can be set to none
 
 # FEAT_FOLDER=/home/fwj/workspace/VisualSearch/unitime_feat/charades_7b #If you specified feature_path in the data file, this can be set to none
 FEAT_FOLDER=None #If you specified feature_path in the data file, this can be set to none
@@ -40,7 +45,8 @@ LORA_ALPHA=32                                            # the lora alpha (both 
 
 # RUN_ID=Relevant_Charades_frame1024_lora88_bsz2_LR2e4_epoch2_251218
 # RUN_ID=Relevant_charades_frame256_lora3232_bsz3_singleqa_LR2e4_epoch2
-RUN_ID=Relevant_charades_frame256_lora3232_bsz3_LR2e4_epoch2_RL_SFT1
+# RUN_ID=Relevant_charades_frame256_lora3232_bsz3_LR2e4_epoch2_RL_SFT1
+RUN_ID=Relevant_qvhl_frame256_lora3232_bsz3_LR2e4_epoch2_RL_SFT1
 
 DS_STAGE=zero2                                          # deepspeed stage; < zero2 | zero3 >
 PER_DEVICE_BATCH_SIZE=1                                # batch size per GPU

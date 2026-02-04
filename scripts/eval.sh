@@ -1,4 +1,4 @@
-export CUDA_VISIBLE_DEVICES=2,3
+export CUDA_VISIBLE_DEVICES=0,1,2,3
 export DECORD_EOF_RETRY_MAX=20480
 
 python inference.py --model_local_path /home/fwj/workspace/pretrain_model/Qwen/Qwen2-VL-7B-Instruct \

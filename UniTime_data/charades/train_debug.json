@@ -1,0 +1,110 @@
+[
+  {
+    "qid": 0,
+    "id": "AO8RW",
+    "annos": [
+      {
+        "query": "a person is putting a book on a shelf.",
+        "window": [
+          [
+            0.0,
+            6.9
+          ]
+        ]
+      }
+    ],
+    "duration": 33.67,
+    "mode": "mr",
+    "video_path": "/media/disk2/fwj/VisualSearch/charades/videos/AO8RW.mp4"
+  },
+  {
+    "qid": 1,
+    "id": "UPL9S",
+    "annos": [
+      {
+        "query": "person walks in holding laptop.",
+        "window": [
+          [
+            57.8,
+            76.0
+          ]
+        ]
+      }
+    ],
+    "duration": 128.58,
+    "mode": "mr_seg",
+    "video_path": "/media/disk2/fwj/VisualSearch/charades/videos/UPL9S.mp4"
+  },
+  {
+    "qid": 2,
+    "id": "IGDIE",
+    "annos": [
+      {
+        "query": "person starts watching television.",
+        "window": [
+          [
+            22.7,
+            33.12
+          ]
+        ]
+      }
+    ],
+    "duration": 33.12,
+    "mode": "mr",
+    "video_path": "/media/disk2/fwj/VisualSearch/charades/videos/IGDIE.mp4"
+  },
+  {
+    "qid": 3,
+    "id": "5UNDJ",
+    "annos": [
+      {
+        "query": "person eating some food.",
+        "window": [
+          [
+            98.1,
+            178.9
+          ]
+        ]
+      }
+    ],
+    "duration": 194.33,
+    "mode": "mr_seg",
+    "video_path": "/media/disk2/fwj/VisualSearch/charades/videos/5UNDJ.mp4"
+  },
+    {
+    "qid": 4,
+    "id": "1Q4SL",
+    "annos": [
+      {
+        "query": "person open the door.",
+        "window": [
+          [
+            20.1,
+            27.2
+          ]
+        ]
+      }
+    ],
+    "duration": 30.88,
+    "mode": "mr",
+    "video_path": "/media/disk2/fwj/VisualSearch/charades/videos/1Q4SL.mp4"
+  },
+  {
+    "qid": 5,
+    "id": "1375X",
+    "annos": [
+      {
+        "query": "person smiling in a pantry.",
+        "window": [
+          [
+            10.0,
+            22.8
+          ]
+        ]
+      }
+    ],
+    "duration": 28.5,
+    "mode": "mr",
+    "video_path": "/media/disk2/fwj/VisualSearch/charades/videos/1375X.mp4"
+  }
+]

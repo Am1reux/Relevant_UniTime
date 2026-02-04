@@ -24,6 +24,14 @@ class Qwen2VLMRForConditionalGeneration(Qwen2VLForConditionalGeneration):
         )
         self.model = Qwen2VLModel(config)
         self.vocab_size = config.vocab_size
+
+        # if hasattr(config, "vocab_size"):
+        #     self.vocab_size = config.vocab_size
+        # elif hasattr(config, "text_config") and hasattr(config.text_config, "vocab_size"):
+        #     self.vocab_size = config.text_config.vocab_size
+        # else:
+        #     raise AttributeError("Cannot find vocab_size in config or config.text_config")
+
         self.lm_head = nn.Linear(config.hidden_size, config.vocab_size, bias=False)
         self.padding_side = "left"  # set it to left by default, user can use setter to change padding_sides
         self.rope_deltas = None
@@ -527,7 +535,14 @@ class Qwen2VLMRForConditionalGeneration(Qwen2VLForConditionalGeneration):
         return input_ids, model_kwargs
 
 from transformers.processing_utils import ProcessingKwargs, ProcessorMixin, Unpack
-from transformers.image_utils import ImageInput, VideoInput
+# from transformers.image_utils import ImageInput, VideoInput
+
+from transformers.image_utils import ImageInput
+try:
+    from transformers.video_utils import VideoInput   # transformers v5+
+except ImportError:
+    from transformers.image_utils import VideoInput   # transformers v4.x fallback
+
 from transformers.feature_extraction_utils import BatchFeature
 from transformers.tokenization_utils_base import PreTokenizedInput, TextInput
 from transformers.models.qwen2_vl.processing_qwen2_vl import Qwen2VLProcessorKwargs, Qwen2VLProcessor
